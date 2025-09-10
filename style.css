@@ -1,0 +1,113 @@
+/* style.css - basic clean portfolio styling */
+
+:root{
+  --bg: #f7f8fb;
+  --card: #ffffff;
+  --text: #222;
+  --muted: #666;
+  --accent: #2b6cb0;
+  --wrap: 1000px;
+}
+
+*{box-sizing: border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+.wrap{
+  width:90%;
+  max-width:var(--wrap);
+  margin:0 auto;
+  padding:28px 0;
+}
+
+/* Header */
+.site-header{
+  background:#1f2937;
+  color:#fff;
+  padding:30px 0;
+  text-align:center;
+}
+.site-title{
+  margin:0;
+  font-size:1.9rem;
+  letter-spacing:0.5px;
+}
+.site-sub{
+  margin:6px 0 14px 0;
+  color:#d1d5db;
+}
+.nav a{
+  color:#fff;
+  margin:0 10px;
+  text-decoration:none;
+  font-weight:600;
+}
+.nav a:hover{text-decoration:underline}
+
+/* Sections */
+.section{
+  padding:30px 0;
+  background:transparent;
+}
+.section h2{
+  text-align:center;
+  margin:0 0 18px 0;
+  color:var(--text);
+}
+
+/* Grid for projects */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(240px,1fr));
+  gap:18px;
+  margin-top:18px;
+}
+.card{
+  background:var(--card);
+  border-radius:10px;
+  padding:18px;
+  box-shadow: 0 6px 18px rgba(10,10,20,0.05);
+  border:1px solid rgba(15,15,20,0.03);
+}
+.card h3{margin-top:0}
+.card a{color:var(--accent)}
+
+/* Skills */
+.skills{
+  list-style:none;
+  padding:0;
+  margin:10px 0 0 0;
+  text-align:center;
+}
+.skills li{
+  display:inline-block;
+  background:#eef2ff;
+  color:#1e293b;
+  margin:6px;
+  padding:10px 14px;
+  border-radius:20px;
+  font-weight:600;
+}
+
+/* Footer */
+.site-footer{
+  background:#111827;
+  color:#cbd5e1;
+  text-align:center;
+  padding:18px 0;
+  margin-top:30px;
+}
+.site-footer a{color:#93c5fd}
+
+/* Responsive tweaks */
+@media (max-width:520px){
+  .site-title{font-size:1.4rem}
+  .wrap{padding:18px 12px}
+}
