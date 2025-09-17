@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Click the Box Game</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+    }
+    #gameArea {
+      position: relative;
+      width: 500px;
+      height: 400px;
+      background: white;
+      border: 2px solid #333;
+      overflow: hidden;
+    }
+    #box {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background: red;
+      cursor: pointer;
+      display: none;
+    }
+    #score {
+      margin-top: 15px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div id="gameArea">
+      <div id="box"></div>
+    </div>
+    <div id="score">Score: 0</div>
+  </div>
+
+  <script>
+    const box = document.getElementById("box");
+    const gameArea = document.getElementById("gameArea");
+    const scoreDisplay = document.getElementById("score");
+    let score = 0;
+    const WIN_SCORE = 10;
+
+    // show box at random position
+    function showBox() {
+      const x = Math.random() * (gameArea.clientWidth - 50);
+      const y = Math.random() * (gameArea.clientHeight - 50);
+      box.style.left = x + "px";
+      box.style.top = y + "px";
+      box.style.display = "block";
+    }
+
+    // when box is clicked
+    box.addEventListener("click", () => {
+      score++;
+      scoreDisplay.textContent = "Score: " + score;
+      box.style.display = "none";
+
+      if (score >= WIN_SCORE) {
+        alert("🎉 You win! Final Score: " + score);
+      } else {
+        setTimeout(showBox, 500); // show again after 0.5s
+      }
+    });
+
+    // start game
+    showBox();
+  </script>
+</body>
+</html>
