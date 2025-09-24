@@ -1,70 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Khatri Rasina Devi - Portfolio</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rasina Portfolio 2025</title>
+<style>
+  body { margin: 0; font-family: Arial, sans-serif; background: #111; color: white; scroll-behavior: smooth; }
+  nav { position: fixed; top: 0; width: 100%; background: #222; padding: 10px; display: flex; justify-content: center; z-index: 100; }
+  nav a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; transition: color 0.3s; }
+  nav a:hover { color: #ff4081; }
+
+  section { padding: 80px 20px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  h1, h2 { text-align: center; }
+  canvas { display: block; margin: 20px auto; background: radial-gradient(circle at center, #111, #000); border: 2px solid #fff; border-radius: 8px; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+
+  button, select { margin: 6px; padding: 8px 14px; font-size: 16px; cursor: pointer; border-radius: 6px; border: none; background: #222; color: white; transition: background 0.3s; }
+  button:hover, select:hover { background: #444; }
+  #score { font-size: 18px; text-align:center; margin: 10px; }
+  #gameOverModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; border: 2px solid #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 30px rgba(255,255,255,0.4); z-index: 10; }
+
+  /* Portfolio Sections Example */
+  #about, #projects, #contact { min-height: 80vh; width: 90%; max-width: 1000px; }
+</style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav>
-    <ul>
-      <li><a href="#about">About</a></li>
-      <li><a href="#projects">Projects</a></li>
-      <li><a href="#skills">Skills</a></li>
-      <li><a href="#contact">Contact</a></li>
-    </ul>
-  </nav>
 
-  <!-- Hero Section -->
-  <header>
-    <h1>Khatri Rasina Devi</h1>
-    <p>Student at DongA University | Member of Red Cross Society (Nepal)</p>
-    <a href="#projects" class="btn">View My Work</a>
-  </header>
+<!-- Navigation -->
+<nav>
+  <a href="#about">About</a>
+  <a href="#projects">Projects</a>
+  <a href="#games">Games</a>
+  <a href="#contact">Contact</a>
+</nav>
 
-  <!-- About Section -->
-  <section id="about">
-    <h2>About Me</h2>
-    <p>
-      Hello! I'm Rasina, a passionate student currently studying at DongA University. 
-      I'm also a proud member of the Red Cross Society in Nepal. 
-      I enjoy learning web development and programming, and I aim to build modern, user-friendly websites.
-    </p>
-  </section>
+<!-- Portfolio Sections -->
+<section id="about">
+  <h1>About Me</h1>
+  <p>Welcome! I am Rasina Khatri. This is my portfolio.</p>
+</section>
 
-  <!-- Projects Section -->
-  <section id="projects">
-    <h2>Projects</h2>
-    <div class="project-card">
-      <h3>Project One</h3>
-      <p>A sample project showcasing my HTML and CSS skills.</p>
-      <a href="#">View Project</a>
-    </div>
-    <div class="project-card">
-      <h3>Project Two</h3>
-      <p>A small Python program that automates basic tasks.</p>
-      <a href="#">View Project</a>
-    </div>
-  </section>
+<section id="projects">
+  <h2>My Projects</h2>
+  <p>Some of my work and projects go here.</p>
+</section>
 
-  <!-- Skills Section -->
-  <section id="skills">
-    <h2>Skills</h2>
-    <p>HTML, CSS, Python</p>
-  </section>
+<!-- New Game Section -->
+<section id="games">
+  <h2>🎮 Play Ping Pong!</h2>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <p id="score">Player: 0 | Computer: 0 | Level: 1</p>
+  <div style="text-align:center;">
+    <button id="playPauseBtn">Play</button>
+    <button onclick="resetGame()">Restart</button>
+    <button onclick="toggleSound()">🔊 Sound</button>
+    <select id="levelSelect" onchange="setLevel(this.value)">
+      <option value="1">Level 1</option>
+      <option value="2">Level 2</option>
+      <option value="3">Level 3</option>
+    </select>
+  </div>
+  <div id="gameOverModal">
+    <h2 id="result"></h2>
+    <button onclick="resetGame()">Play Again</button>
+  </div>
+</section>
 
-  <!-- Contact Section -->
-  <section id="contact">
-    <h2>Contact Me</h2>
-    <p>Email: <a href="mailto:khatrirasina365@gmail.com">khatrirasina365@gmail.com</a></p>
-    <p>Phone: 010-9767-9525</p>
-  </section>
+<section id="contact">
+  <h2>Contact Me</h2>
+  <p>Email: example@domain.com</p>
+</section>
 
-  <!-- Footer -->
-  <footer>
-    <p>© 2025 Khatri Rasina Devi. Built with ❤️</p>
-  </footer>
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const playPauseBtn = document.getElementById("playPauseBtn");
+const resultText = document.getElementById("result");
+const scoreText = document.getElementById("score");
+const gameOverModal = document.getElementById("gameOverModal");
+const levelSelect = document.getElementById("levelSelect");
+
+let paddleWidth = 80, paddleHeight = 10;
+let playerX = canvas.width/2 - paddleWidth/2;
+const playerY = canvas.height - 30;
+let playerPrevX = playerX;
+
+let computerX = canvas.width/2 - paddleWidth/2;
+const computerY = 20;
+let computerPrevX = computerX;
+
+let ballX = canvas.width/2, ballY = canvas.height/2;
+let ballSpeedX = 3, ballSpeedY = 3;
+const ballRadius = 8;
+let trail = [];
+
+let rightPressed=false, leftPressed=false;
+let playerScore=0, computerScore=0, level=1;
+const winScore = 10;
+let playing=false, gameOver=false;
+let soundOn = true;
+
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioCtx();
+
+const speeds = {1:{ball:3, ai:2, paddle:80},2:{ball:4, ai:3, paddle:70},3:{ball:5, ai:4, paddle:60}};
+
+// Controls
+document.addEventListener("keydown", e=>{
+  if(e.key==="ArrowRight") rightPressed=true;
+  if(e.key==="ArrowLeft") leftPressed=true;
+});
+document.addEventListener("keyup", e=>{
+  if(e.key==="ArrowRight") rightPressed=false;
+  if(e.key==="ArrowLeft") leftPressed=false;
+});
+
+function playSound(freq=440,dur=0.1){
+  if(!soundOn) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.type = "sine"; osc.frequency.value = freq;
+  osc.start(); gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  osc.stop(audioCtx.currentTime+dur);
+}
+
+function toggleSound(){soundOn=!soundOn;}
+
+// Buttons
+playPauseBtn.addEventListener("click", ()=>{
+  if(gameOver){ resetGame(); return; }
+  playing=!playing;
+  playPauseBtn.innerText = playing?"Pause":"Play";
+});
+
+function setLevel(lv){
+  level=parseInt(lv);
+  paddleWidth = speeds[level].paddle;
+  resetBall();
+}
+
+// Reset functions
+function resetBall(){
+  ballX=canvas.width/2; ballY=canvas.height/2;
+  let speed = speeds[level].ball;
+  ballSpeedX = (Math.random()>0.5?1:-1)*speed;
+  ballSpeedY = (Math.random()>0.5?1:-1)*speed;
+  trail = [];
+}
+
+function resetGame(){
+  playerScore=0; computerScore=0; gameOver=false;
+  gameOverModal.style.display="none"; resultText.innerText="";
+  playPauseBtn.innerText="Play"; setLevel(level);
+}
+
+// Drawing
+function drawPaddle(x,y){ctx.fillStyle="white"; ctx.fillRect(x,y,paddleWidth,paddleHeight);}
+function drawBall(){
+  trail.push({x:ballX,y:ballY});
+  if(trail.length>10) trail.shift();
+  for(let i=0;i<trail.length;i++){
+    let t=trail[i];
+    ctx.beginPath(); ctx.arc(t.x,t.y,ballRadius*(i/trail.length),0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,0,0,${i/trail.length})`; ctx.fill();
+  }
+  ctx.beginPath(); ctx.arc(ballX,ballY,ballRadius,0,Math.PI*2);
+  ctx.fillStyle="red"; ctx.shadowBlur=10; ctx.shadowColor="red"; ctx.fill(); ctx.shadowBlur=0; ctx.closePath();
+}
+
+// Update
+function update(){
+  if(!playing || gameOver) return;
+
+  if(rightPressed) playerX += 6;
+  if(leftPressed) playerX -= 6;
+  if(playerX<0) playerX=0;
+  if(playerX+paddleWidth>canvas.width) playerX=canvas.width-paddleWidth;
+  let playerVel = playerX - playerPrevX;
+
+  let compCenter = computerX + paddleWidth/2;
+  const aiSpeed = speeds[level].ai;
+  if(Math.abs(ballX - compCenter) > 10){
+    if(compCenter<ballX) computerX+=aiSpeed; else computerX-=aiSpeed;
+  }
+  if(computerX<0) computerX=0;
+  if(computerX+paddleWidth>canvas.width) computerX=canvas.width-paddleWidth;
+  let computerVel = computerX - computerPrevX;
+
+  // Collisions
+  if(ballSpeedY>0 && ballY+ballRadius >= playerY && ballY-ballRadius <= playerY+paddleHeight){
+    if(ballX + ballRadius >= playerX && ballX - ballRadius <= playerX+paddleWidth){
+      ballSpeedY = -Math.abs(ballSpeedY);
+      ballSpeedX += playerVel*0.3; ballY = playerY - ballRadius; playSound(600);
+    }
+  }
+  if(ballSpeedY<0 && ballY-ballRadius <= computerY+paddleHeight && ballY+ballRadius >= computerY){
+    if(ballX + ballRadius >= computerX && ballX - ballRadius <= computerX+paddleWidth){
+      ballSpeedY = Math.abs(ballSpeedY);
+      ballSpeedX += computerVel*0.3; ballY = computerY + paddleHeight + ballRadius; playSound(400);
+    }
+  }
+
+  ballX += ballSpeedX; ballY += ballSpeedY;
+
+  if(ballX-ballRadius<0 || ballX+ballRadius>canvas.width){ ballSpeedX=-ballSpeedX; playSound(200); }
+
+  if(ballY>canvas.height){ computerScore++; resetBall(); playSound(150); }
+  if(ballY<0){ playerScore++; resetBall(); playSound(800); }
+
+  if(playerScore>=winScore){ resultText.innerText="🎉 You Win!"; gameOver=true; playing=false; playPauseBtn.innerText="Restart"; gameOverModal.style.display="block"; playSound(1000,0.3);}
+  if(computerScore>=winScore){ resultText.innerText="😢 You Lose!"; gameOver=true; playing=false; playPauseBtn.innerText="Restart"; gameOverModal.style.display="block"; playSound(100,0.3);}
+
+  playerPrevX = playerX; computerPrevX = computerX;
+}
+
+function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); drawPaddle(playerX,playerY); drawPaddle(computerX,computerY); drawBall(); scoreText.innerText = `Player: ${playerScore} | Computer: ${computerScore} | Level: ${level}`;}
+
+function gameLoop(){ update(); draw(); requestAnimationFrame(gameLoop); }
+
+setLevel(1); gameLoop();
+</script>
 </body>
 </html>
