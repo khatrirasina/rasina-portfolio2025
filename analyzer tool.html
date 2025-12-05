@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>CSV Analyzer Tool</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: #f5f5f5;
+        color: #222;
+        transition: 0.3s;
+    }
+    .dark {
+        background: #111;
+        color: #eee;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 15px;
+    }
+    th, td {
+        padding: 8px;
+        border: 1px solid #999;
+        text-align: left;
+    }
+    .highlight {
+        background: #ffdddd;
+    }
+    button {
+        padding: 8px 12px;
+        margin: 6px;
+        cursor: pointer;
+    }
+    #charts {
+        margin-top: 20px;
+    }
+</style>
+</head>
+<body>
+
+<h2>CSV Data Analyzer</h2>
+
+<button onclick="toggleDark()">🌙 Toggle Dark Mode</button>
+<br><br>
+
+<input type="file" id="csvFile" accept=".csv"><br><br>
+
+<button onclick="downloadCSV(fullData, 'full_data.csv')">⬇ Download Full Data</button>
+<button onclick="downloadCSV(anomalyRows, 'anomalies.csv')">⬇ Download Anomalies</button>
+<button onclick="downloadFiltered()">⬇ Download Filtered Data</button>
+
+<hr>
+
+<h3>Filter Data</h3>
+<select id="filterColumn"></select>
+<input type="text" id="filterValue" placeholder="Enter value">
+<button onclick="applyFilter()">Apply Filter</button>
+
+<hr>
+
+<h3>Stats</h3>
+<pre id="statsBox"></pre>
+
+<h3>Data Table</h3>
+<div id="tableContainer"></div>
+
+<div id="charts">
+    <h3>Histogram</h3>
+    <canvas id="histogram" width="500" height="200"></canvas>
+
+    <h3>Scatter Plot</h3>
+    <canvas id="scatter" width="500" height="200"></canvas>
+</div>
+
+<script>
+// Global data
+let fullData = [];
+let headers = [];
+let anomalyRows = [];
+let filteredData = [];
+
+function toggleDark() {
+    document.body.classList.toggle("dark");
+}
+
+// Read CSV
+document.getElementById("csvFile").addEventListener("change", function () {
+    let file = this.files[0];
+    let reader = new FileReader();
+    reader.onload = function (e) {
+        parseCSV(e.target.result);
+    };
+    reader.readAsText(file);
+});
+
+function parseCSV(text) {
+    let rows = text.trim().split("\n").map(r => r.split(","));
+    headers = rows[0];
+    fullData = rows.slice(1).map(r => {
+        let obj = {};
+        headers.forEach((h, i) => obj[h] = r[i]);
+        return obj;
+    });
+
+    populateFilterOptions();
+    detectAnomalies();
+    computeStats();
+    displayTable(fullData);
+}
+
+// Dropdown filter column
+function populateFilterOptions() {
+    let select = document.getElementById("filterColumn");
+    select.innerHTML = "";
+    headers.forEach(h => {
+        let opt = document.createElement("option");
+        opt.value = h;
+        opt.textContent = h;
+        select.appendChild(opt);
+    });
+}
+
+// Apply filter
+function applyFilter() {
+    let col = document.getElementById("filterColumn").value;
+    let val = document.getElementById("filterValue").value.trim();
+
+    filteredData = fullData.filter(row =>
+        row[col].toString().includes(val)
+    );
+
+    displayTable(filteredData);
+}
+
+// Detect anomalies using Z-score
+function detectAnomalies() {
+    anomalyRows = [];
+    
+    headers.forEach(col => {
+        let nums = fullData.map(r => parseFloat(r[col])).filter(n => !isNaN(n));
+        if (nums.length === 0) return;
+
+        let mean = nums.reduce((a,b)=>a+b)/nums.length;
+        let sd = Math.sqrt(nums.map(n => (n-mean)**2).reduce((a,b)=>a+b)/nums.length);
+
+        fullData.forEach((row, i) => {
+            let val = parseFloat(row[col]);
+            if (!isNaN(val)) {
+                let z = (val - mean) / sd;
+                if (Math.abs(z) > 3) {
+                    anomalyRows.push(row);
+                    row._anomaly = true;
+                }
+            }
+        });
+    });
+}
+
+// Stats for each numeric column
+function computeStats() {
+    let out = "";
+
+    headers.forEach(col => {
+        let nums = fullData.map(r => parseFloat(r[col])).filter(n => !isNaN(n));
+        if (nums.length === 0) return;
+
+        nums.sort((a,b)=>a-b);
+        let mean = nums.reduce((a,b)=>a+b)/nums.length;
+        let median = nums[Math.floor(nums.length/2)];
+        let min = nums[0];
+        let max = nums[nums.length-1];
+        let sd = Math.sqrt(nums.map(n => (n-mean)**2).reduce((a,b)=>a+b)/nums.length);
+
+        out += `Column: ${col}
+ Count: ${nums.length}
+ Mean: ${mean.toFixed(2)}
+ Median: ${median}
+ Min: ${min}
+ Max: ${max}
+ SD: ${sd.toFixed(2)}
+
+`;
+    });
+
+    document.getElementById("statsBox").textContent = out;
+}
+
+// Display table
+function displayTable(data) {
+    let html = "<table><tr>";
+    headers.forEach(h => html += `<th>${h}</th>`);
+    html += "</tr>";
+
+    data.forEach(row => {
+        let highlight = row._anomaly ? "class='highlight'" : "";
+        html += `<tr ${highlight}>`;
+        headers.forEach(h => html += `<td>${row[h]}</td>`);
+        html += "</tr>";
+    });
+
+    html += "</table>";
+
+    document.getElementById("tableContainer").innerHTML = html;
+}
+
+// Download CSV
+function downloadCSV(data, filename) {
+    if (!data || data.length === 0) {
+        alert("No data to download!");
+        return;
+    }
+
+    let csv = [headers.join(",")];
+    data.forEach(row => {
+        csv.push(headers.map(h => row[h]).join(","));
+    });
+
+    let blob = new Blob([csv.join("\n")], { type: "text/csv" });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+}
+
+// Download filtered data
+function downloadFiltered() {
+    downloadCSV(filteredData, "filtered_data.csv");
+}
+</script>
+
+</body>
+</html>
